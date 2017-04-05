@@ -24,7 +24,7 @@ const iopa = require('iopa'),
 module.exports = function parseIntent(context, next) {
 
     // Ensure this context record is actually a valid (bot) message 
-    if (!context[BOT.Session])
+    if (!context[BOT.Session] || !context[BOT.Text])
         return next();
 
     var session = context[BOT.Session];
@@ -106,19 +106,22 @@ function invokeIntent(context, next) {
   
     var skills = context[SERVER.Capabilities][BOT.CAPABILITIES.Skills].skills;
 
+    if (!context[BOT.Intent]) {
+      return next();
+    }
+    
     if (!session[BOT.Skill])
     {
        session[BOT.Skill] = 'default'
     }
-      
+
     var intent = skills[session[BOT.Skill]].intents[context[BOT.Intent]];
 
     if (intent && intent["function"])
         return intent["function"](context, next);
 
     return next();
-};
-
+}
 
 function _matchUtterancesForIntent(skill, context, intentkey) {
 
